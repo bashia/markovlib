@@ -1,8 +1,16 @@
+import random
 from random import random as rand
 from random import choice
 from collections import deque as queue
 from math import floor
-from probdict import ProbDict
+try:
+    from collections import UserDict
+    from itertools import accumulate
+except ImportError:
+    from backwards_compat import old_accumulate
+    accumulate = old_accumulate
+    from UserDict import UserDict
+import bisect
 
 class AbstractElement:
     def __init__(self, element, terminal=False):
@@ -16,6 +24,34 @@ class AbstractElement:
             return False
     def __hash__(self):
         return hash((self.element,self.isTerminal))
+
+
+class ProbDict(UserDict):
+
+    def __init__(self):
+        try:
+            super().__init__(self)
+        except TypeError:
+            UserDict.__init__(self)
+        return
+
+    def __getitem__(self,key):
+        weightedoptions = list(self.data[key].items())
+        choices, weights = zip(*weightedoptions)
+        cumdist = list(accumulate(weights))
+        x = random.random() * cumdist[-1]
+        return choices[bisect.bisect(cumdist, x)]
+
+    def __setitem__(self,key,value):
+        if key not in self.data:
+            self.data[key] = {value:1}
+        else:
+            if value in self.data[key]:
+                self.data[key][value] += 1
+            else:
+                self.data[key][value] = 1
+        return
+
 
 #MarkovModel takes a sequence of sequences and a depth and creates a model using
 # the ProbDict class. Class must be instantiated before calling any of its methods.
