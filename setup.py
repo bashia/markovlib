@@ -6,5 +6,6 @@ setup(name = "markovlib",
 	author_email = "bashia@uvic.ca",
 	license = "GPL v2",
 	packages = find_packages(),
-	zip_safe=False
+	url = "https://github.com/bashia/markovlib",
+	download_url = "https://github.com/bashia/markovlib/tarball/0.1"
 	)
